@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>22개정 정보 교과 빈칸 맞추기</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+:root{
+  --bg:#f4f1eb;--card:#fffef9;--red:#c0392b;--red-bg:#fdf0ef;
+  --navy:#1b2a4a;--navy2:#2c4270;--gold:#b8922a;--gold-lt:#fdf3dc;
+  --text:#1a1a1a;--muted:#777;--border:#ddd5c5;
+  --ok:#1e8c4e;--ok-bg:#e8f9ef;--ng:#c0392b;--ng-bg:#fdf0ef;
+  --sh:0 2px 14px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.7}
+
+/* ── HEADER ── */
+header{background:var(--navy);color:#fff;padding:20px 28px 16px;border-bottom:4px solid var(--gold)}
+header h1{font-size:1.35rem;font-weight:900;letter-spacing:-.5px}
+header p{font-size:.78rem;color:#9fb0cc;margin-top:3px}
+.hbar{display:flex;gap:12px;flex-wrap:wrap;margin-top:12px}
+.hpill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:3px 14px;font-size:.78rem;color:#dde6f5}
+.hpill b{color:var(--gold)}
+
+/* ── NAV ── */
+nav{background:var(--navy2);display:flex;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{background:none;border:none;color:#8da8c8;padding:10px 18px;font-family:inherit;font-size:.78rem;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:.18s}
+nav button:hover{color:#fff;background:rgba(255,255,255,.06)}
+nav button.on{color:var(--gold);border-bottom-color:var(--gold);background:rgba(184,146,42,.1);font-weight:700}
+
+/* ── MAIN ── */
+main{max-width:960px;margin:0 auto;padding:26px 18px 70px}
+.sec{display:none}.sec.on{display:block}
+
+/* ── SECTION TITLE ── */
+.stitle{font-size:1.1rem;font-weight:900;color:var(--navy);border-left:5px solid var(--red);padding-left:12px;margin-bottom:20px;line-height:1.4}
+
+/* ── CARD ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:18px;box-shadow:var(--sh)}
+.ctag{font-size:.72rem;font-weight:700;color:var(--red);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ctag::before{content:'';width:7px;height:7px;background:var(--red);border-radius:50%;display:inline-block;flex-shrink:0}
+
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.86rem}
+table th{background:var(--navy);color:#fff;padding:9px 12px;font-weight:500;font-size:.8rem;text-align:center;white-space:nowrap}
+table td{padding:10px 14px;border:1px solid var(--border);vertical-align:middle;line-height:2.2}
+table tr:nth-child(even) td{background:#faf8f3}
+.tlabel{font-weight:700;color:var(--navy);background:#eceae4!important;text-align:center;white-space:nowrap;width:12%}
+.tw .bw{display:inline-flex;flex-wrap:nowrap;margin:2px 0}
+
+/* ── BLANK ── */
+.bw{display:inline-flex;align-items:center;gap:2px;position:relative}
+input.b{
+  display:inline-block;
+  min-width:60px;
+  width:60px;          /* JS가 동적으로 늘림 */
+  border:none;
+  border-bottom:2px solid var(--red);background:transparent;
+  font-family:inherit;font-size:.88rem;color:var(--text);
+  padding:1px 8px;text-align:center;outline:none;
+  transition:border .18s, background .18s;border-radius:0;
+  box-sizing:content-box;
+}
+input.b:focus{border-bottom-color:var(--navy);background:#eef2ff;border-radius:3px 3px 0 0}
+input.b.ok{border:1.5px solid var(--ok);background:var(--ok-bg);color:var(--ok);border-radius:4px;font-weight:700}
+input.b.ng{border:1.5px solid var(--ng);background:var(--ng-bg);color:var(--ng);border-radius:4px}
+.tick{display:none;font-size:.85rem}
+input.b.ok~.tick{display:inline}
+.hint{display:none;position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);
+  white-space:nowrap;background:#fffbe6;border:1px solid var(--gold);
+  border-radius:4px;padding:2px 9px;font-size:.73rem;color:#7a5c00;z-index:20;pointer-events:none;
+  box-shadow:0 2px 6px rgba(0,0,0,.10)}
+.bw:has(input.ng):hover .hint{display:none}
+
+
+/* ── PARAGRAPH TEXT ── */
+.para{font-size:.88rem;line-height:2.0}
+.para p{margin-bottom:8px}
+
+/* ── LIST ITEMS ── */
+.li{font-size:.88rem;line-height:1.95;padding:9px 0;border-bottom:1px dashed var(--border)}
+.li:last-child{border-bottom:none}
+.badge{display:inline-block;background:var(--navy);color:#fff;font-size:.7rem;font-weight:700;padding:1px 8px;border-radius:10px;margin-right:7px;vertical-align:middle;letter-spacing:.4px}
+.code{display:inline-block;background:var(--navy);color:var(--gold);font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:4px;margin-right:6px;font-family:monospace;letter-spacing:.4px}
+.sub{font-size:.83rem;font-weight:700;color:var(--navy2);padding:5px 11px;background:#eef1f7;border-radius:6px;margin:15px 0 9px}
+
+/* ── YEAR TABLE ── */
+.ytable table td{font-size:.84rem;line-height:1.85}
+.ybadge{display:inline-block;background:var(--navy);color:#fff;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:4px;white-space:nowrap}
+
+/* ── BUTTONS ── */
+.brow{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-family:inherit;font-size:.82rem;font-weight:700;cursor:pointer;transition:.18s}
+.btn-p{background:var(--navy);color:#fff}.btn-p:hover{background:var(--navy2);transform:translateY(-1px)}
+.btn-s{background:var(--border);color:var(--navy)}.btn-s:hover{background:#ccc5b5}
+.btn-d{background:var(--red-bg);color:var(--red);border:1px solid var(--red)}.btn-d:hover{background:var(--red);color:#fff}
+
+/* ── RESULT BANNER ── */
+.rb{display:none;margin-top:14px;padding:11px 16px;border-radius:7px;font-size:.86rem;font-weight:700;align-items:center;gap:9px}
+.rb.show{display:flex}
+.rb.ac{background:var(--ok-bg);color:var(--ok);border:1.5px solid var(--ok)}
+.rb.pt{background:var(--gold-lt);color:var(--gold);border:1.5px solid var(--gold)}
+
+@media(max-width:600px){
+  header{padding:14px 16px}header h1{font-size:1.1rem}
+  .card{padding:14px 15px}main{padding:15px 10px 60px}
+  nav button{padding:9px 13px;font-size:.75rem}
+  input.b{min-width:55px;font-size:.82rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 22개정 정보 교과 단원별 교육과정 — 빈칸 맞추기</h1>
+  <p>빨간 박스 핵심 용어를 입력하면 즉시 정답을 확인할 수 있습니다</p>
+  <div class="hbar">
+    <div class="hpill">전체 정답 <b id="tc">0</b> / <b id="tt">0</b></div>
+    <div class="hpill">정답률 <b id="tp">0</b>%</div>
+  </div>
+</header>
+
+<nav>
+  <button class="on" onclick="go('s1',this)">① 교과 역량 &amp; 연도별 특징</button>
+  <button onclick="go('s2',this)">② AI기초 성격·목표</button>
+  <button onclick="go('s3',this)">③ AI기초 1. 인공지능의 이해</button>
+  <button onclick="go('s4',this)">④ AI기초 2. 인공지능과 학습</button>
+  <button onclick="go('s5',this)">⑤ AI기초 3. 사회적 영향</button>
+  <button onclick="go('s6',this)">⑥ AI기초 4. 인공지능 프로젝트</button>
+  <button onclick="go('s7',this)">⑦ AI기초 교수·학습 및 평가</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════
+     S1  교과 역량 + 연도별 특징
+══════════════════════════════ -->
+<div class="sec on" id="s1">
+<div class="stitle">정보 교과 역량 &amp; 정보 교육과정 연도별 특징 (1쪽)</div>
+
+<!-- 교과역량 표 -->
+<div class="card">
+  <div class="ctag">교과 역량 3가지 및 하위요소</div>
+  <div class="tw"><table>
+    <tr><th style="width:18%">교과역량</th><th style="width:52%">의미</th><th style="width:30%">하위요소</th></tr>
+    <tr>
+      <td class="tlabel" style="width:18%"><span class="bw"><input class="b" data-a="컴퓨팅사고력" placeholder="역량명" oninput="ck(this)"><span class="tick">✅</span><span class="hint">컴퓨팅사고력</span></span></td>
+      <td class="para">컴퓨팅을 활용한 문제 해결을 전제로 문제를 발견, 분석하여 실생활과 다양한 학문 분야의 문제를 해결하기 위한 새로운 방법론을 제시할 수 있는 능력</td>
+      <td>
+        <span class="bw"><input class="b" data-a="추상화 능력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">추상화 능력</span></span><br>
+        <span class="bw"><input class="b" data-a="자동화 능력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">자동화 능력</span></span><br>
+        <span class="bw"><input class="b" data-a="창의·융합 능력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">창의·융합 능력</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel" style="width:18%"><span class="bw"><input class="b" data-a="디지털 문화 소양" placeholder="역량명" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털 문화 소양</span></span></td>
+      <td class="para">디지털 사회의 구성원으로서의 윤리의식과 시민성을 갖추고 디지털 기술을 기반으로 의사소통하고 협업할 수 있는 능력</td>
+      <td>
+        <span class="bw"><input class="b" data-a="디지털 의사 소통·협업 능력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털 의사 소통·협업 능력</span></span><br>
+        <span class="bw"><input class="b" data-a="디지털 윤리의식" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털 윤리의식</span></span><br>
+        <span class="bw"><input class="b" data-a="디지털 기술 활용능력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털 기술 활용능력</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel" style="width:18%"><span class="bw"><input class="b" data-a="인공지능 소양" placeholder="역량명" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 소양</span></span></td>
+      <td class="para">인간과 인공지능의 공존을 모색하는 사람 중심의 인공지능 윤리의식과 데이터에 대한 이해를 기반으로 인공지능을 통해 문제를 해결할 수 있는 능력</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능 문제해결력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 문제해결력</span></span><br>
+        <span class="bw"><input class="b" data-a="데이터 문해력" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터 문해력</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능 윤리의식" placeholder="하위요소" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 윤리의식</span></span>
+      </td>
+    </tr>
+  </table></div>
+
+  <div class="sub" style="margin-top:18px">▶ 총론 연계</div>
+  <div class="para">
+    <p>• 컴퓨팅 사고력, 인공지능 소양 → 총론의 <span class="bw"><input class="b" data-a="지식정보처리 역량" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지식정보처리 역량</span></span>&nbsp;<span class="bw"><input class="b" data-a="창의적 사고 역량" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">창의적 사고 역량</span></span> 과 연계</p>
+    <p>• 디지털 문화 소양, 인공지능 소양 → 총론의 <span class="bw"><input class="b" data-a="협력적 소통 역량" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">협력적 소통 역량</span></span>&nbsp;<span class="bw"><input class="b" data-a="공동체 역량" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">공동체 역량</span></span> 과 연계</p>
+  </div>
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s1')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s1')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s1')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s1a-result"></div>
+</div>
+
+<!-- 연도별 특징 표 -->
+<div class="card">
+  <div class="ctag">정보 교육과정 연도별 특징</div>
+  <div class="tw ytable"><table>
+    <tr><th style="width:13%">시기</th><th>주요 내용 및 특징</th></tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 2차</span></td>
+      <td class="para">교육과정에 컴퓨터 관련 내용 및 과목 최초로 도입</td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 3차</span></td>
+      <td class="para">일반 보통 교육으로 컴퓨터교육이 다루어지는 계기</td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 4차</span></td>
+      <td class="para">일반 보통 교육으로써 컴퓨터교육의 도입 확대</td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 5차</span></td>
+      <td class="para">교육과정에 컴퓨터 관련 내용 확대</td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 6차</span></td>
+      <td class="para">제한적이나마 컴퓨터 관련 독립과목 최초 신설(중학교에 '컴퓨터' 선택과목 신설)<br>컴퓨터교육 기회의 확대</td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">제 7차</span></td>
+      <td class="para">
+        중학교에 '컴퓨터'를 교과 재량활동의 우선 배정과목으로 설정, 일반계 고등학교에
+        <span class="bw"><input class="b" data-a="정보 사회와 컴퓨터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">정보 사회와 컴퓨터</span></span>를
+        기술·가정 교과의 <span class="bw"><input class="b" data-a="일반 선택 과목" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">일반 선택 과목</span></span>으로 설정
+        (컴퓨터 관련 독립과목 선택 가능성 증가)<br>
+        (초·중등학교 정보통신 기술 교육 운영 지침(2000, 2005))<br>
+        - 초·중등학교 컴퓨터교육의 <span class="bw"><input class="b" data-a="필수화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">필수화</span></span><br>
+        - 모든 교과에서 <span class="bw"><input class="b" data-a="ICT활용 교육 강조" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">ICT활용 교육 강조</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">2007<br>개정</span></td>
+      <td class="para">
+        - 초·중·고등학교의 컴퓨터 교과 이름을 <span class="bw"><input class="b" data-a="'정보'로 통일" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">'정보'로 통일</span></span>(명칭 변경)<br>
+        - 중·고등학교의 정보 교육에 대한 체계적, 단계적 내용 설계(4영역), 중학교 정보 교육은 <span class="bw"><input class="b" data-a="3단계 체제" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">3단계 체제</span></span>로 제시<br>
+        - 컴퓨터과학교육의 강조 및 단계적 교육 내용 강화)<br>
+        - <span class="bw"><input class="b" data-a="컴퓨터 과학" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">컴퓨터 과학</span></span>의 핵심내용 구성과 문제 해결력을 중시한 영역 개발, <span class="bw"><input class="b" data-a="정보 윤리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">정보 윤리</span></span>와 같은 시대적 요구반영
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">2009<br>개정</span></td>
+      <td class="para">
+        - <span class="bw"><input class="b" data-a="계산적 사고교육" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">계산적 사고교육</span></span>과 <span class="bw"><input class="b" data-a="융합 교육" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">융합 교육</span></span>의 기초 과목임을 강조<br>
+        - 중·고등학교의 학습 내용 요소를 20% 절감하고, 중학교 <span class="bw"><input class="b" data-a="3단계를 하나의 단계로 통합" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">3단계를 하나의 단계로 통합</span></span> (학습 내용의 적정화 시도)<br>
+        - 웹 문서, 멀티미디어 관련 내용과 데이터베이스, 객체지향 프로그래밍 등의 <span class="bw"><input class="b" data-a="내용 요소 삭제" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">내용 요소 삭제</span></span>·중·고등학교의 <span class="bw"><input class="b" data-a="연계성 유지" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">연계성 유지</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">2015<br>개정</span></td>
+      <td class="para">
+        - 컴퓨팅 사고력 개념 정의와 핵심역량으로 <span class="bw"><input class="b" data-a="'정보문화 소양'" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">'정보문화 소양'</span></span>, '컴퓨팅 사고력', <span class="bw"><input class="b" data-a="'협력적 문제해결력'" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">'협력적 문제해결력'</span></span> 제시<br>
+        - 중학교 '정보' <span class="bw"><input class="b" data-a="필수 교과 지정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">필수 교과 지정</span></span>과 고등학교 '정보' <span class="bw"><input class="b" data-a="일반 선택 과목" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">일반 선택 과목</span></span>으로 변경<br>
+        - <span class="bw"><input class="b" data-a="피지컬 컴퓨팅 도입" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">피지컬 컴퓨팅 도입</span></span><br>
+        - 교과군 도입(과학/기술·가정/정보)<br>
+        [2015 일부 개정교육과정] 인공지능의 개념과 기본원리, 기술을 활용하여 실생활 및 다양한 분야의 문제를 창의적으로 해결할 수 있는 기초 소양을 기르기 위한 <span class="bw"><input class="b" data-a="선택 과목" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">선택 과목</span></span>이 고시되었다.
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel"><span class="ybadge">2022<br>개정</span></td>
+      <td class="para">
+        - 중학교 정보는 기존의 컴퓨팅 사고 과정에 실생활 중심 인공지능 기본 개념과 윤리 등이 추가되었다.<br>
+        - 고등학교에서는 정보 교과군이 새롭게 편성되면서 <span class="bw"><input class="b" data-a="일반 선택" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">일반 선택</span></span>으로 '정보', <span class="bw"><input class="b" data-a="진로 선택" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">진로 선택</span></span>으로 '인공지능 기초', '데이터 과학', <span class="bw"><input class="b" data-a="융합 선택" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">융합 선택</span></span>으로 '소프트웨어와 생활'이 추가되었다.
+      </td>
+    </tr>
+  </table></div>
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s1')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s1')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s1')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s1-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S2  고등 AI기초 성격·목표 (16쪽)
+══════════════════════════════ -->
+<div class="sec" id="s2">
+<div class="stitle">고등학교 인공지능 기초 — 성격 및 목표 (16쪽)</div>
+
+<div class="card">
+  <div class="ctag">성격 — 핵심 키워드 (내용 요소)</div>
+  <div class="para">
+    <p>'인공지능 기초'는 학문의 분야 중 <span class="bw"><input class="b" data-a="컴퓨터과학" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">컴퓨터과학</span></span>, <span class="bw"><input class="b" data-a="데이터 과학" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터 과학</span></span>, <span class="bw"><input class="b" data-a="정보시스템" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">정보시스템</span></span>의 내용을 기반으로, 개인의 삶과 다양한 분야에서 직접적인 영향을 미치고 있는 인공지능에 대한 <span class="bw"><input class="b" data-a="깊은 이해" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">깊은 이해</span></span>를 제공하게 된다.</p>
+    <p>미래 사회의 변화와 불확실성 등으로 인한 <span class="bw"><input class="b" data-a="진로와 직업" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">진로와 직업</span></span>의 변화에 능동적으로 대처하며, 인공지능의 주체적 사용자인 학습자가 인공지능을 인간 중심으로 안전하고 책임 있게 사용하는 <span class="bw"><input class="b" data-a="자기주도성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">자기주도성</span></span>을 갖춘 <span class="bw"><input class="b" data-a="디지털 민주시민" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털 민주시민</span></span>으로 성장하게 한다.</p>
+    <p><span class="bw"><input class="b" data-a="프로젝트 기반" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">프로젝트 기반</span></span>의 프로그래밍을 통한 직접 구현, <span class="bw"><input class="b" data-a="모델에 대한 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">모델에 대한 평가</span></span> 등 인공지능에 대한 깊이 있는 학습을 기반으로 <span class="bw"><input class="b" data-a="대학의 전공" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">대학의 전공</span></span>과 연계된 <span class="bw"><input class="b" data-a="기초경험" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기초경험</span></span>을 제공하도록 한다.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">목표 — 핵심 개념</div>
+  <div class="para">
+    <p>'인공지능 기초'는 인공지능의 발전에 따른 사회의 변화를 파악하고, <span class="bw"><input class="b" data-a="인공지능의 원리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 원리</span></span>에 대한 이해를 바탕으로 인공지능을 다양한 분야의 문제를 <span class="bw"><input class="b" data-a="창의적" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">창의적</span></span>으로 해결하기 위한 <span class="bw"><input class="b" data-a="핵심 도구" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">핵심 도구</span></span>로서 프로그래밍할 수 있으며, 인공지능의 <span class="bw"><input class="b" data-a="윤리적 쟁점" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">윤리적 쟁점</span></span>에 관한 올바른 <span class="bw"><input class="b" data-a="가치관과 태도" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">가치관과 태도</span></span>를 함양하는 데 중점을 둔다.</p>
+  </div>
+  <div class="sub">목표 세부항목</div>
+  <div class="li"><span class="badge">(1)</span>인공지능에 대한 이해를 바탕으로 실생활의 문제를 인공지능의 <span class="bw"><input class="b" data-a="관점" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">관점</span></span>에서 파악하고, <span class="bw"><input class="b" data-a="지능적 판단" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지능적 판단</span></span>을 구현하기 위해 탐색과 추론 방식을 적용하는 능력과 태도를 기른다.</div>
+  <div class="li"><span class="badge">(2)</span>기계학습을 활용하여 해결할 수 있는 <span class="bw"><input class="b" data-a="문제를 정의" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">문제를 정의</span></span>하고, 문제 해결 과정에서 필요한 <span class="bw"><input class="b" data-a="데이터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터</span></span>와 <span class="bw"><input class="b" data-a="모델" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">모델</span></span>을 활용하여 문제를 효과적으로 해결하는 능력과 태도를 기른다.</div>
+  <div class="li"><span class="badge">(3)</span>인공지능의 발전에 따른 <span class="bw"><input class="b" data-a="인간의 삶" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인간의 삶</span></span>과 <span class="bw"><input class="b" data-a="진로의 변화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">진로의 변화</span></span>를 탐색하고, 인공지능의 다양한 측면에 대한 <span class="bw"><input class="b" data-a="비판적인 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">비판적인 자세</span></span>를 바탕으로 인공지능과 관련된 윤리적 문제에 대해 올바른 <span class="bw"><input class="b" data-a="가치관" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">가치관</span></span>을 형성할 수 있는 태도를 기른다.</div>
+  <div class="li"><span class="badge">(4)</span>인공지능이 다양한 분야와 융합하여 <span class="bw"><input class="b" data-a="새로운 가치를 창출" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">새로운 가치를 창출</span></span>할 수 있다는 점을 인식하고, 인류가 직면해 있는 문제를 인공지능을 활용하여 해결할 수 있는 능력과 태도를 기른다.</div>
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s2')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s2')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s2')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s2-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S3  AI기초 1. 인공지능의 이해 (17쪽)
+══════════════════════════════ -->
+<div class="sec" id="s3">
+<div class="stitle">고등학교 인공지능 기초 1. 인공지능의 이해 (17쪽)</div>
+
+<div class="card">
+  <div class="ctag">핵심 아이디어</div>
+  <div class="para">
+    <p>• <span class="bw"><input class="b idea-blank" data-a="인공지능은 인간의 지능적인 행동을 모방하는 것으로 실생활에 도움을 준다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능은 인간의 지능적인 행동을 모방하는 것으로 실생활에 도움을 준다</span></span>.</p>
+    <p>• <span class="bw"><input class="b" data-a="탐색과 추론으로 문제를 해결하는 인공지능을 구현하는 것은 다양한 학문 분야에 활용된다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색과 추론으로 문제를 해결하는 인공지능을 구현하는 것은 다양한 학문 분야에 활용된다</span></span>.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">내용 요소 (지식·이해 / 과정·기능 / 가치·태도)</div>
+  <div class="tw"><table>
+    <tr><th style="width:15%">구분</th><th>내용 요소</th></tr>
+    <tr>
+      <td class="tlabel">지식·이해</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능의 원리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 원리</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능과 탐색" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 탐색</span></span><br>
+        <span class="bw"><input class="b" data-a="지식의 표현과 추론" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지식의 표현과 추론</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">과정·기능</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능 기반 문제 해결 사례 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 기반 문제 해결 사례 탐색하기</span></span><br>
+        <span class="bw"><input class="b" data-a="탐색 알고리즘을 문제 해결에 적용하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색 알고리즘을 문제 해결에 적용하기</span></span><br>
+        <span class="bw"><input class="b" data-a="추론을 통해 새로운 지식을 생성하는 방법 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">추론을 통해 새로운 지식을 생성하는 방법 탐색하기</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">가치·태도</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능의 필요성과 적용 가능성 인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 필요성과 적용 가능성 인식</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="인공지능을 활용하여 실생활 및 다양한 학문 분야의 문제를 해결하는 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능을 활용하여 실생활 및 다양한 학문 분야의 문제를 해결하는 자세</span></span>
+      </td>
+    </tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="ctag">성취기준</div>
+  <div class="li"><span class="code">12인기01-01</span>인공지능의 <span class="bw"><input class="b" data-a="지능적 판단" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지능적 판단</span></span>에 대한 이해를 바탕으로 인공지능을 활용한 실생활 및 다양한 학문 분야의 문제 해결 사례를 비교·분석한다.</div>
+  <div class="li"><span class="code">12인기01-02</span>인공지능에서 <span class="bw"><input class="b" data-a="탐색" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색</span></span>의 중요성을 이해하고 문제 해결을 위한 탐색 과정을 설계한다.</div>
+  <div class="li"><span class="code">12인기01-03</span><span class="bw"><input class="b" data-a="맹목적 탐색" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">맹목적 탐색</span></span>과 정보 이용 탐색의 차이를 중심으로 <span class="bw"><input class="b" data-a="지능적 탐색" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지능적 탐색</span></span>의 원리를 파악한다.</div>
+  <div class="li"><span class="code">12인기01-04</span>지능적 탐색이 필요한 문제를 찾아보고 문제 해결을 위해 <span class="bw"><input class="b" data-a="정보 이용 탐색 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">정보 이용 탐색 알고리즘</span></span>을 적용한다.</div>
+  <div class="li"><span class="code">12인기01-05</span>규칙과 사실을 활용하여 <span class="bw"><input class="b" data-a="지식을 표현" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지식을 표현</span></span>하고, 새로운 지식을 추론하여 생성한다.</div>
+
+  <div class="sub">(가) 성취기준 해설</div>
+  <div class="para">
+    <p>[12인기01-01] 인공지능의 <span class="bw"><input class="b" data-a="개념과 특성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">개념과 특성</span></span>을 이해하고, <span class="bw"><input class="b" data-a="튜링 테스트" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">튜링 테스트</span></span>를 통해 인공지능의 지능적 판단에 대해 고찰하며, 인공지능이 활용된 최신 사례를 분석하여 인공지능의 <span class="bw"><input class="b" data-a="활용 범위와 중요성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">활용 범위와 중요성</span></span>을 설명할 수 있어야 한다.</p>
+    <p>[12인기01-04] 지능적 탐색을 적용할 수 있는 <span class="bw"><input class="b" data-a="퍼즐" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">퍼즐</span></span>이나 <span class="bw"><input class="b" data-a="길찾기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">길찾기</span></span> 문제를 탐색하고, <span class="bw"><input class="b" data-a="최상 우선" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">최상 우선</span></span>, <span class="bw"><input class="b" data-a="A*" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">A*</span></span> 등의 정보 이용 탐색 방법을 적용한 인공지능 프로그램을 <span class="bw"><input class="b" data-a="개발" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">개발</span></span>할 수 있어야 한다.</p>
+  </div>
+
+  <div class="sub">(나) 성취기준 적용 시 고려 사항</div>
+  <div class="para">
+    <p>• 인공지능의 다양한 <span class="bw"><input class="b" data-a="사례" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사례</span></span>를 탐색하여 실제로 많은 분야에 인공지능이 활용되고 있음을 인식하고, 인공지능을 구현하는 방법으로서 <span class="bw"><input class="b" data-a="탐색 방식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색 방식</span></span>에 대한 이해를 바탕으로 문제를 해결할 수 있는 능력을 함양하도록 교수·학습을 계획한다. 특히 탐색 방식으로 문제를 해결하는 과정에서는 <span class="bw"><input class="b" data-a="탐색 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색 알고리즘</span></span>을 적용한 프로그램을 <span class="bw"><input class="b" data-a="개발" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">개발</span></span>하는 방식으로 활동을 구성하도록 한다.</p>
+    <p>• 실제 사례를 통해 인공지능의 <span class="bw"><input class="b" data-a="개념" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">개념</span></span>을 정확하게 이해하고 있는지, 인공지능의 <span class="bw"><input class="b" data-a="중요성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">중요성</span></span>을 설명할 수 있는지를 평가한다. 또한, 문제 해결에 적합한 <span class="bw"><input class="b" data-a="탐색 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">탐색 알고리즘</span></span>을 선택하여 적용하였는지, 개발한 인공지능 프로그램이 문제를 해결하는 데 <span class="bw"><input class="b" data-a="효과적" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">효과적</span></span>이었는지에 중점을 두어 평가하도록 한다.</p>
+  </div>
+
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s3')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s3')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s3')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s3-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S4  AI기초 2. 인공지능과 학습 (18쪽)
+══════════════════════════════ -->
+<div class="sec" id="s4">
+<div class="stitle">고등학교 인공지능 기초 2. 인공지능과 학습 (18쪽)</div>
+
+<div class="card">
+  <div class="ctag">핵심 아이디어</div>
+  <div class="para">
+    <p>• <span class="bw"><input class="b idea-blank" data-a="기계학습 기반의 인공지능을 구현하기 위해서는 문제 해결에 적합한 데이터와 기계학습 모델을 활용한다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습 기반의 인공지능을 구현하기 위해서는 문제 해결에 적합한 데이터와 기계학습 모델을 활용한다</span></span>.</p>
+    <p>• <span class="bw"><input class="b idea-blank" data-a="딥러닝은 다중의 은닉층으로 구성된 인공신경망으로 복잡한 문제를 효과적으로 해결하는 데 활용된다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">딥러닝은 다중의 은닉층으로 구성된 인공신경망으로 복잡한 문제를 효과적으로 해결하는 데 활용된다</span></span>.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">내용 요소</div>
+  <div class="tw"><table>
+    <tr><th>구분</th><th>내용 요소</th></tr>
+    <tr>
+      <td class="tlabel">지식·이해</td>
+      <td>
+        <span class="bw"><input class="b" data-a="기계학습과 데이터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습과 데이터</span></span><br>
+        <span class="bw"><input class="b" data-a="기계학습 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습 알고리즘</span></span><br>
+        <span class="bw"><input class="b" data-a="인공신경망과 딥러닝" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공신경망과 딥러닝</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">과정·기능</td>
+      <td>
+        <span class="bw"><input class="b" data-a="기계학습을 적용할 문제 정의하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습을 적용할 문제 정의하기</span></span><br>
+        <span class="bw"><input class="b" data-a="해결하고자 하는 문제에 적합한 데이터 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">해결하고자 하는 문제에 적합한 데이터 탐색하기</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="문제에 적합한 기계학습 알고리즘을 선정하고, 모델 구현하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">문제에 적합한 기계학습 알고리즘을 선정하고, 모델 구현하기</span></span><br>
+        <span class="bw"><input class="b" data-a="딥러닝을 활용한 문제 해결 방법 탐색하고 구현하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">딥러닝을 활용한 문제 해결 방법 탐색하고 구현하기</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">가치·태도</td>
+      <td>
+        <span class="bw"><input class="b" data-a="기계학습에 적용하는 데이터의 중요성 판단" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습에 적용하는 데이터의 중요성 판단</span></span><br>
+        <span class="bw"><input class="b" data-a="학습을 통한 인공지능의 효과성과 효율성 인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습을 통한 인공지능의 효과성과 효율성 인식</span></span>
+      </td>
+    </tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="ctag">성취기준</div>
+  <div class="li"><span class="code">12인기02-01</span>기계학습을 적용할 문제를 정의하고, 문제 해결에 필요한 데이터를 선정하여 수집한다.</div>
+  <div class="li"><span class="code">12인기02-02</span>수집한 데이터를 가공하여 <span class="bw"><input class="b" data-a="핵심 속성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">핵심 속성</span></span>을 추출한다.</div>
+  <div class="li"><span class="code">12인기02-03</span>문제 해결에 적합한 기계학습의 <span class="bw"><input class="b" data-a="유형과 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">유형과 알고리즘</span></span>을 선정한다.</div>
+  <div class="li"><span class="code">12인기02-04</span><span class="bw"><input class="b" data-a="훈련 데이터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">훈련 데이터</span></span>를 이용하여 학습을 진행하고, <span class="bw"><input class="b" data-a="테스트 데이터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">테스트 데이터</span></span>를 사용하여 성능을 평가한다.</div>
+  <div class="li"><span class="code">12인기02-05</span><span class="bw"><input class="b" data-a="인공신경망과 딥러닝" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공신경망과 딥러닝</span></span>의 특성에 대한 이해를 바탕으로 활용 분야를 탐색한다.</div>
+  <div class="li"><span class="code">12인기02-06</span>딥러닝을 활용하여 실생활 및 다양한 학문 분야의 문제를 해결하고, 성능을 평가한다.</div>
+
+  <div class="sub">(가) 성취기준 해설</div>
+  <div class="para">
+    <p>[12인기02-01] 전통적 프로그래밍과 대비되는 <span class="bw"><input class="b" data-a="기계학습의 특성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습의 특성</span></span>을 이해하여 기계학습 기반의 인공지능을 적용할 문제를 판단하고, 문제 해결에 적합한 데이터를 수집할 수 있어야 한다. 이 과정에서 나타날 수 있는 <span class="bw"><input class="b" data-a="데이터의 편향" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터의 편향</span></span>이 인공지능의 학습에 영향을 미칠 수 있음을 고려하여 데이터의 수집과 활용에 <span class="bw"><input class="b" data-a="공정성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">공정성</span></span>을 추구할 수 있어야 한다.</p>
+    <p>[12인기02-02] 기계학습에 사용할 데이터를 수집한 후, <span class="bw"><input class="b" data-a="결측치" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">결측치</span></span>와 <span class="bw"><input class="b" data-a="이상치" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">이상치</span></span>의 유무를 파악하고 문제 해결에 필요한 속성이 무엇인지 선별한 다음 문제 해결에 적합한 형태로 <span class="bw"><input class="b" data-a="전처리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">전처리</span></span>할 수 있어야 한다.</p>
+    <p>[12인기02-03] 기계학습의 유형을 <span class="bw"><input class="b" data-a="지도학습" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지도학습</span></span>과 <span class="bw"><input class="b" data-a="비지도학습" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">비지도학습</span></span>, <span class="bw"><input class="b" data-a="강화학습" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">강화학습</span></span> 등으로 구분하고, 해결해야 하는 문제의 특성을 고려하여 문제 해결에 적합한 유형을 선정할 수 있어야 한다. 또한, <span class="bw"><input class="b" data-a="분류" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">분류</span></span>, <span class="bw"><input class="b" data-a="예측" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">예측</span></span>, <span class="bw"><input class="b" data-a="군집" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">군집</span></span> 등에 활용하는 기계학습 알고리즘을 이해하여 적합한 알고리즘을 <span class="bw"><input class="b" data-a="선정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">선정</span></span>할 수 있어야 한다.</p>
+    <p>[12인기02-06] 딥러닝을 기반으로 하는 <span class="bw"><input class="b" data-a="컴퓨터 비전" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">컴퓨터 비전</span></span>, <span class="bw"><input class="b" data-a="음성 인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">음성 인식</span></span>, <span class="bw"><input class="b" data-a="자연어처리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">자연어처리</span></span> 기술을 구현하는 방식을 이용하고, 적합한 딥러닝 기술을 활용하여 실생활 및 다양한 학문 분야의 문제를 해결할 수 있어야 한다. 문제 해결에 있어 딥러닝을 활용해 문제를 해결하는 경우와 다른 방법으로 문제를 해결하는 경우의 <span class="bw"><input class="b" data-a="차이점" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">차이점</span></span>을 설명할 수 있어야 한다.</p>
+  </div>
+
+  <div class="sub">(나) 성취기준 적용 시 고려 사항</div>
+  <div class="para">
+    <p>• 해결하고자 하는 문제에 따라 <span class="bw"><input class="b" data-a="기계학습" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습</span></span>의 사용이 적합한지를 판단할 수 있도록 적절한 <span class="bw"><input class="b" data-a="문제 상황" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">문제 상황</span></span>을 선정하도록 하며, 기계학습에서 데이터의 <span class="bw"><input class="b" data-a="중요성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">중요성</span></span>을 인식하고, 데이터를 수집하는 과정에서 데이터가 <span class="bw"><input class="b" data-a="편향" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">편향</span></span>되지 않게 충분히 안내하도록 한다.</p>
+    <p>• 프로그래밍 역량이 낮은 학생은 <span class="bw"><input class="b" data-a="이미 작성된 코드를 실행" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">이미 작성된 코드를 실행</span></span>시켜 코드를 이해한 후 차츰 <span class="bw"><input class="b" data-a="코드 일부를 수정하는 방식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">코드 일부를 수정하는 방식</span></span>으로 학습할 수 있도록 하고, 프로그래밍 역량이 높은 학생은 작성이 완료되지 않은 코드를 스스로 완성하여 실행시킬 수 있도록 하는 등 교수·학습 단계를 세부적으로 구성하여 학습자의 <span class="bw"><input class="b" data-a="흥미" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">흥미</span></span>가 유지되도록 한다. 또한, 기계학습과 딥러닝을 <span class="bw"><input class="b" data-a="코드로 구현" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">코드로 구현</span></span>하는 학습을 원활하게 진행하기 위해, 다양한 <span class="bw"><input class="b" data-a="라이브러리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">라이브러리</span></span> 활용 방법을 충분히 안내한다.</p>
+    <p>• 문제 해결에 사용된 <span class="bw"><input class="b" data-a="데이터" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터</span></span>와 <span class="bw"><input class="b" data-a="기계학습 유형" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습 유형</span></span>, <span class="bw"><input class="b" data-a="기계학습 알고리즘" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">기계학습 알고리즘</span></span>이 해결하고자 하는 문제의 특성에 비추어 적합한지를 평가한다. 또한, 이미 개발되어 있는 딥러닝 프로그램 <span class="bw"><input class="b" data-a="코드의 활용" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">코드의 활용</span></span>을 권장하되 실생활 및 다양한 학문 분야의 문제를 스스로 생각하여 해결할 수 있도록 교수·학습을 구성하고, 학생의 <span class="bw"><input class="b" data-a="학습 과정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습 과정</span></span>과 <span class="bw"><input class="b" data-a="창의적인 아이디어" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">창의적인 아이디어</span></span>를 중심으로 평가 <span class="bw"><input class="b" data-a="루브릭" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">루브릭</span></span>을 작성하여 평가하도록 한다.</p>
+  </div>
+
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s4')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s4')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s4')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s4-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S5  AI기초 3. 사회적 영향 (19쪽)
+══════════════════════════════ -->
+<div class="sec" id="s5">
+<div class="stitle">고등학교 인공지능 기초 3. 인공지능의 사회적 영향 (19쪽)</div>
+
+<div class="card">
+  <div class="ctag">핵심 아이디어</div>
+  <div class="para">
+    <p>• <span class="bw"><input class="b idea-blank" data-a="인공지능이 현대 사회에 끼치는 영향력이 커지고 있고, 이에 따라 직업의 변화 속도가 빨라지고 있다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능이 현대 사회에 끼치는 영향력이 커지고 있고, 이에 따라 직업의 변화 속도가 빨라지고 있다</span></span>.</p>
+    <p>• <span class="bw"><input class="b idea-blank" data-a="인공지능을 올바르게 활용하기 위해서는 인공지능에 의해 발생할 수 있는 윤리적 문제에 대한 이해가 필요하다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능을 올바르게 활용하기 위해서는 인공지능에 의해 발생할 수 있는 윤리적 문제에 대한 이해가 필요하다</span></span>.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">내용 요소</div>
+  <div class="tw"><table>
+    <tr><th>구분</th><th>내용 요소</th></tr>
+    <tr>
+      <td class="tlabel">지식·이해</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능의 발전과 사회 변화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 발전과 사회 변화</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능과 진로" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 진로</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능과 윤리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 윤리</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">과정·기능</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능으로 해결할 수 있는 사회적 문제 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능으로 해결할 수 있는 사회적 문제 탐색하기</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="인공지능에 의해 변화하는 인간의 삶과 직업의 양상 파악하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능에 의해 변화하는 인간의 삶과 직업의 양상 파악하기</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능과 인간의 공존 방안에 대해 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 인간의 공존 방안에 대해 탐색하기</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능과 관련된 윤리적 딜레마 상황에 대해 논의하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 관련된 윤리적 딜레마 상황에 대해 논의하기</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">가치·태도</td>
+      <td>
+        <span class="bw"><input class="b" data-a="진로 및 직업 관련에서 인공지능의 중요성 인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">진로 및 직업 관련에서 인공지능의 중요성 인식</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="인공지능의 다양한 측면에 대한 비판적 자세와 윤리적 태도" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 다양한 측면에 대한 비판적 자세와 윤리적 태도</span></span>
+      </td>
+    </tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="ctag">성취기준</div>
+  <div class="li"><span class="code">12인기03-01</span>인공지능의 <span class="bw"><input class="b" data-a="발전으로 인한 사회 변화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">발전으로 인한 사회 변화</span></span>를 살펴보고, 인공지능으로 해결할 수 있는 사회적 문제를 분석한다.</div>
+  <div class="li"><span class="code">12인기03-02</span>인공지능에 <span class="bw"><input class="b" data-a="의해 변화하는 인간의 삶과 직업의 양상" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">의해 변화하는 인간의 삶과 직업의 양상</span></span>에 대해 이해하고 진로를 탐색한다.</div>
+  <div class="li"><span class="code">12인기03-03</span>인공지능에 <span class="bw"><input class="b" data-a="대한 비판적 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">대한 비판적 자세</span></span>를 바탕으로 인공지능과 인간의 공존 방안을 도출한다.</div>
+  <div class="li"><span class="code">12인기03-04</span>인공지능의 <span class="bw"><input class="b" data-a="활용사례와 윤리적 딜레마 상황" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">활용사례와 윤리적 딜레마 상황</span></span>을 인공지능 윤리 관점에서 분석한다.</div>
+
+  <div class="sub">(가) 성취기준 해설</div>
+  <div class="para">
+    <p>[12인기03-03] 인공지능에 대한 일방적인 수용 또는 거부보다는, <span class="bw"><input class="b" data-a="비판적인 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">비판적인 자세</span></span>를 바탕으로 인간과 공존해야 하는 존재로서 <span class="bw"><input class="b" data-a="인공지능의 역할" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 역할</span></span>을 제시할 수 있어야 한다. 인공지능을 대하는 인간의 태도에 대한 <span class="bw"><input class="b" data-a="윤리적 고찰" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">윤리적 고찰</span></span>을 통해 바람직한 <span class="bw"><input class="b" data-a="공존 방식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">공존 방식</span></span>을 규정할 수 있어야 한다.</p>
+    <p>[12인기03-04] 인간의 <span class="bw"><input class="b" data-a="편향성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">편향성</span></span>에 대한 이해를 바탕으로, 알고리즘과 데이터의 편향성으로 인해 인공지능이 사회에 끼치는 영향을 이해하고 인공지능으로 인한 <span class="bw"><input class="b" data-a="딜레마 상황" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">딜레마 상황</span></span>에서 윤리적인 판단과 선택을 할 수 있어야 한다. 현재까지 정의되어진 인공지능 윤리(지침)와 관련하여 인공지능 <span class="bw"><input class="b" data-a="개발자, 사용자, 운영·관리자" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">개발자, 사용자, 운영·관리자</span></span> 관점을 살펴보고, 인공지능 기술 활용으로 발생 가능한 윤리적 쟁점에 대하여 <span class="bw"><input class="b" data-a="사회적 책임" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사회적 책임</span></span>과 <span class="bw"><input class="b" data-a="공정성의 가치" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">공정성의 가치</span></span>를 판단할 수 있어야 한다.</p>
+  </div>
+
+  <div class="sub">(나) 성취기준 적용 시 고려 사항</div>
+  <div class="para">
+    <p>• 인공지능의 <span class="bw"><input class="b" data-a="사회적 가치와 영향력" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사회적 가치와 영향력</span></span>이 중요하다는 것과 새롭게 고려해야 할 윤리적 쟁점에 대한 충분한 사회적 논의 과정이 필요하다는 것을 전제로, 인공지능 사회의 구성원으로서 갖추어야 할 <span class="bw"><input class="b" data-a="인공지능 윤리의식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 윤리의식</span></span>과 <span class="bw"><input class="b" data-a="가치 판단 능력" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">가치 판단 능력</span></span>을 함양하여 인공지능 시대의 <span class="bw"><input class="b" data-a="사회적 책임" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사회적 책임</span></span>과 <span class="bw"><input class="b" data-a="공정성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">공정성</span></span>을 실천할 수 있도록 하는 데 중점을 두고 교수·학습을 구성하도록 한다.</p>
+    <p>• 인공지능의 발전으로 인한 <span class="bw"><input class="b" data-a="사회의 변화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사회의 변화</span></span>를 조사하고 인공지능에 의해 변화할 <span class="bw"><input class="b" data-a="미래 사회의 모습을 예측" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">미래 사회의 모습을 예측</span></span>하는 과정에서 자신의 진로를 구체적으로 설계하기 위해 <span class="bw"><input class="b" data-a="충분한 자료" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">충분한 자료</span></span>를 제공하도록 한다.</p>
+    <p>• 인공지능과 관련된 윤리적 쟁점 사례를 조사하고, 구체적인 사안을 주제로 하는 <span class="bw"><input class="b" data-a="토론 활동" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">토론 활동</span></span>의 과정에서 인공지능 윤리의 중요성과 인공지능과 인간의 관계를 올바르게 설명할 수 있는지를 평가하도록 한다. 이 과정에서 근거를 바탕으로 자신의 주장을 펼치고 타인의 견해를 <span class="bw"><input class="b" data-a="존중" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">존중</span></span>하는 <span class="bw"><input class="b" data-a="성숙한 토론 문화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">성숙한 토론 문화</span></span>를 조성하도록 한다.</p>
+  </div>
+
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s5')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s5')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s5')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s5-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S6  AI기초 4. 인공지능 프로젝트 (20쪽)
+══════════════════════════════ -->
+<div class="sec" id="s6">
+<div class="stitle">고등학교 인공지능 기초 4. 인공지능 프로젝트 (20쪽)</div>
+
+<div class="card">
+  <div class="ctag">핵심 아이디어</div>
+  <div class="para">
+    <p>• <span class="bw"><input class="b idea-blank" data-a="인공지능은 다양한 분야와 융합하여 새로운 가치를 창출하는 데 도움을 준다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능은 다양한 분야와 융합하여 새로운 가치를 창출하는 데 도움을 준다</span></span>.</p>
+    <p>• <span class="bw"><input class="b idea-blank" data-a="인공지능은 지속가능발전목표를 달성하는 데 도움을 준다" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능은 지속가능발전목표를 달성하는 데 도움을 준다</span></span>.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">내용 요소</div>
+  <div class="tw"><table>
+    <tr><th>구분</th><th>내용 요소</th></tr>
+    <tr>
+      <td class="tlabel">지식·이해</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능과 지속가능발전목표" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능과 지속가능발전목표</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능 문제 해결 절차" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 문제 해결 절차</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">과정·기능</td>
+      <td>
+        <span class="bw"><input class="b" data-a="인공지능 프로젝트 주제 탐색하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로젝트 주제 탐색하기</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능 프로젝트 수행 계획 구안하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로젝트 수행 계획 구안하기</span></span><br>
+        <span class="bw"><input class="b" data-a="인공지능 소프트웨어 개발 및 평가 방법 설정하기" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 소프트웨어 개발 및 평가 방법 설정하기</span></span>
+      </td>
+    </tr>
+    <tr>
+      <td class="tlabel">가치·태도</td>
+      <td>
+        <span class="bw"><input class="b idea-blank" data-a="인류의 지속가능발전에서 인공지능의 중요성 및 가치를 판단하는 태도" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인류의 지속가능발전에서 인공지능의 중요성 및 가치를 판단하는 태도</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="인공지능 프로젝트를 수행하는 과정에서 협력적으로 문제를 해결하는 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로젝트를 수행하는 과정에서 협력적으로 문제를 해결하는 자세</span></span><br>
+        <span class="bw"><input class="b idea-blank" data-a="프로젝트를 수행하는 과정에서 윤리 문제 등 사회적 영향 인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">프로젝트를 수행하는 과정에서 윤리 문제 등 사회적 영향 인식</span></span>
+      </td>
+    </tr>
+  </table></div>
+</div>
+
+<div class="card">
+  <div class="ctag">성취기준</div>
+  <div class="li"><span class="code">12인기04-01</span><span class="bw"><input class="b" data-a="지속가능발전목표를 해결하기 위해 인공지능을 적용" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지속가능발전목표를 해결하기 위해 인공지능을 적용</span></span>할 수 있는 방안을 탐색하고, <span class="bw"><input class="b" data-a="인공지능 프로젝트 활동에 적합한 주제" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로젝트 활동에 적합한 주제</span></span>를 도출한다.</div>
+  <div class="li"><span class="code">12인기04-02</span>인공지능 문제 해결 과정에 기반하여 <span class="bw"><input class="b" data-a="프로젝트 수행 계획" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">프로젝트 수행 계획</span></span>을 구안한다.</div>
+  <div class="li"><span class="code">12인기04-03</span>인공지능 프로젝트를 수행하는 과정에서 <span class="bw"><input class="b" data-a="협력적인 문제 해결 자세" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">협력적인 문제 해결 자세</span></span>를 바탕으로 인공지능 소프트웨어를 개발한다.</div>
+  <div class="li"><span class="code">12인기04-04</span>인공지능의 <span class="bw"><input class="b" data-a="사회적 영향" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">사회적 영향</span></span>을 고려하여 인공지능 소프트웨어를 개발하고, 평가 결과를 반영하여 <span class="bw"><input class="b" data-a="성능을 개선" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">성능을 개선</span></span>한다.</div>
+
+  <div class="sub">(가) 성취기준 해설</div>
+  <div class="para">
+    <p>[12인기04-01] 지속가능발전목표는 2015년 유엔 총회에서 결의한 것으로 총 17개의 주요 목표와 169개의 세부 목표로 구성되어 있다는 것을 이해하고, 17개의 주요 목표를 통해 현재 인류가 직면하고 있는 위기가 무엇인지 인식할 수 있어야 한다. 인공지능을 활용하여 달성할 수 있는 목표에는 어떤 것이 있는지를 살펴보고 <span class="bw"><input class="b" data-a="인공지능 프로젝트" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로젝트</span></span> 활동에 적합한 주제를 도출할 수 있어야 한다.</p>
+    <p>[12인기04-02] <span class="bw"><input class="b" data-a="문제 정의" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">문제 정의</span></span>, 문제 해결에 적합한 <span class="bw"><input class="b" data-a="데이터 수집 및 전처리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">데이터 수집 및 전처리</span></span>, 기계학습 <span class="bw"><input class="b" data-a="유형과 알고리즘 선정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">유형과 알고리즘 선정</span></span>, 기계학습을 통한 <span class="bw"><input class="b" data-a="모델 생성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">모델 생성</span></span>, 성능 <span class="bw"><input class="b" data-a="평가 및 수정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">평가 및 수정</span></span> 등의 인공지능 문제 해결 과정에 따라 <span class="bw"><input class="b" data-a="프로젝트 수행 계획을 구안" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">프로젝트 수행 계획을 구안</span></span>할 수 있어야 한다.</p>
+  </div>
+
+  <div class="sub">(나) 성취기준 적용 시 고려 사항</div>
+  <div class="para">
+    <p>• 인공지능 프로젝트를 위한 <span class="bw"><input class="b" data-a="주제 선정" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">주제 선정</span></span> 과정에서 인류가 직면해 있는 다양한 위기를 충분히 <span class="bw"><input class="b" data-a="인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인식</span></span>할 수 있도록 하고, 이러한 위기를 극복하는 다양한 방법 중 하나로 인공지능이 <span class="bw"><input class="b" data-a="중요한 역할" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">중요한 역할</span></span>을 수행할 수 있다는 점을 강조하도록 한다. 또한, 인공지능을 활용하는 방법적인 측면에서 직접 구현하기가 어려운 부분이 있더라도 학습자의 아이디어를 <span class="bw"><input class="b" data-a="존중" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">존중</span></span>하여 다양한 생각이 <span class="bw"><input class="b" data-a="발산" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">발산</span></span>될 수 있는 활동을 구성하도록 한다.</p>
+    <p>• 인공지능 프로젝트를 수행하는 과정에서 인공지능 소프트웨어의 <span class="bw"><input class="b" data-a="완성도" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">완성도</span></span>뿐만 아니라 <span class="bw"><input class="b" data-a="주제의 적절성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">주제의 적절성</span></span>, <span class="bw"><input class="b" data-a="문제 해결 방식의 창의성" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">문제 해결 방식의 창의성</span></span>, <span class="bw"><input class="b" data-a="다른 사람과의 협업 능력" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">다른 사람과의 협업 능력</span></span> 등 다각적인 측면을 골고루 반영하여 평가할 수 있는 <span class="bw"><input class="b" data-a="루브릭" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">루브릭</span></span>을 제작하도록 한다.</p>
+  </div>
+
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s6')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s6')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s6')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s6-result"></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════
+     S7  AI기초 교수·학습 및 평가 (21쪽)
+══════════════════════════════ -->
+<div class="sec" id="s7">
+<div class="stitle">고등학교 인공지능 기초 — 교수·학습 및 평가 (21쪽)</div>
+
+<div class="card">
+  <div class="ctag">(1) 교수·학습의 방향</div>
+  <div class="para">
+    <p>(가) 실제적인 삶의 맥락에서 컴퓨팅을 통해 문제를 해결하도록 하는 <span class="bw"><input class="b" data-a="학습 과제" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습 과제</span></span>를 제시하여 학습자가 과제를 스스로 해결하는 과정에서 자연스럽게 컴퓨팅 사고력, 디지털 문화 소양, 인공지능 소양을 함양할 수 있도록 지도한다.</p>
+    <p>(나) 학습자의 흥미와 다양성을 고려하여 학습 소재, 학습 환경 및 학습 과정에 대한 <span class="bw"><input class="b" data-a="선택의 기회를 제공" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">선택의 기회를 제공</span></span>하고, 교수·학습의 설계 과정에 학습자 참여 기회를 증진하는 등 <span class="bw"><input class="b" data-a="학습자 맞춤형 교수·학습" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습자 맞춤형 교수·학습</span></span>을 통해 <span class="bw"><input class="b" data-a="역량 함양" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">역량 함양</span></span>을 위한 깊이 있는 학습 지도 방안을 구성한다.</p>
+    <p>(다) '인공지능 기초' 과목의 교수·학습은 <span class="bw"><input class="b" data-a="인공지능의 원리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능의 원리</span></span>에 대한 이해를 바탕으로 문제를 <span class="bw"><input class="b" data-a="효율적으로 해결하는 역량" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">효율적으로 해결하는 역량</span></span>을 향상하는 데 중점을 둔다. '인공지능 기초' 과목 내의 내용 영역, 다른 교과 및 비교과 활동과의 융합을 통해 학생의 <span class="bw"><input class="b" data-a="인공지능 소양" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 소양</span></span>이 다양한 분야에 전이될 수 있도록 한다.</p>
+    <p>(라) '인공지능 기초' 과목과 연계된 <span class="bw"><input class="b" data-a="진로 및 직업을 안내" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">진로 및 직업을 안내</span></span>하고 학생이 <span class="bw"><input class="b" data-a="자신의 진로" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">자신의 진로</span></span>를 탐색할 수 있도록 교수·학습 과정을 구성한다.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">(2) 교수·학습 방법</div>
+  <div class="para">
+    <p>(나) 학습자 개별로 학습하는 속도가 다양할 수 있음을 고려하고, 최소 성취수준을 보장할 수 있도록 <span class="bw"><input class="b" data-a="학습관리시스템(LMS)" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습관리시스템(LMS)</span></span>을 활용하여 온라인 학습자료를 제작 및 제공함으로써 <span class="bw"><input class="b" data-a="학습 격차" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">학습 격차</span></span>를 최소화하도록 노력한다.</p>
+    <p>(다) 학습자의 <span class="bw"><input class="b" data-a="디지털·인공지능 소양" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">디지털·인공지능 소양</span></span>에 대해 선제적으로 파악하고 학생의 현재 수준에 맞는 방식으로 교수·학습 활동을 구성한다. 프로그래밍을 통한 <span class="bw"><input class="b" data-a="인공지능 프로그램의 개발" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인공지능 프로그램의 개발</span></span> 활동을 중심으로 하되, 인공지능 개념 이해에 도움이 되는 소프트웨어나 인공지능 관련 <span class="bw"><input class="b" data-a="라이브러리" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">라이브러리</span></span>를 적극적으로 활용하여 <span class="bw"><input class="b" data-a="최소 성취수준" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">최소 성취수준</span></span>을 보장하도록 한다.</p>
+    <p>(라) 디지털 교육 환경에 적응할 수 있도록 온오프라인 연계 수업, 다양한 디지털 도구의 활용 등을 통해 디지털 도구에 대한 <span class="bw"><input class="b" data-a="인지적 부담은 최소화" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인지적 부담은 최소화</span></span>하고, <span class="bw"><input class="b" data-a="활용에 대한 경험은 높일" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">활용에 대한 경험은 높일</span></span> 수 있도록 수업을 구성한다.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">(3) 평가의 방향</div>
+  <div class="para">
+    <p>(나) 평가 내용은 <span class="bw"><input class="b" data-a="지식·이해" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지식·이해</span></span>뿐 아니라, <span class="bw"><input class="b" data-a="과정·기능" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">과정·기능</span></span>, <span class="bw"><input class="b" data-a="가치·태도" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">가치·태도</span></span>의 측면 등을 다면적으로 반영하고 과정을 중시하는 평가를 통해 학생의 <span class="bw"><input class="b" data-a="성장과 발달" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">성장과 발달</span></span>을 돕는 평가를 실현한다.</p>
+    <p>(다) 구체적인 평가 <span class="bw"><input class="b" data-a="루브릭" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">루브릭</span></span>을 학생과 함께 구성하는 과정을 통해 학생이 자신의 학습 수준을 파악하고 스스로 학습을 성찰할 수 있는 기회를 제공하여, <span class="bw"><input class="b" data-a="적극적" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">적극적</span></span>이고 <span class="bw"><input class="b" data-a="능동적인" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">능동적인</span></span> 학습이 이루어지도록 한다.</p>
+    <p>(라) 인공지능 프로그램 구현에 프로그래밍 활동이 포함되나 프로그래밍 내용보다는 인공지능의 <span class="bw"><input class="b" data-a="구현과 활용" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">구현과 활용</span></span>, 인공지능 활용에 대한 <span class="bw"><input class="b" data-a="인식" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">인식</span></span>에 초점을 맞추어 평가한다.</p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="ctag">(4) 평가 방법</div>
+  <div class="para">
+    <p>(가) 성취기준을 분석하고 재구성하여 <span class="bw"><input class="b" data-a="지필평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">지필평가</span></span> 및 <span class="bw"><input class="b" data-a="수행평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">수행평가</span></span>, <span class="bw"><input class="b" data-a="관찰 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">관찰 평가</span></span>, <span class="bw"><input class="b" data-a="서·논술형 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">서·논술형 평가</span></span> 등을 활용하는 종합적인 평가 <span class="bw"><input class="b" data-a="포트폴리오" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">포트폴리오</span></span>를 계획하고, <span class="bw"><input class="b" data-a="교사 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">교사 평가</span></span>, <span class="bw"><input class="b" data-a="자기 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">자기 평가</span></span>, <span class="bw"><input class="b" data-a="동료 평가" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">동료 평가</span></span> 등과 같은 다면적 평가를 실행하여 학생 성장에 기여할 수 있는 결과를 제공한다.</p>
+    <p>(나) 평가 내용이나 방법에 따라 다양한 디지털 도구(프로그램 자동 평가시스템(online judge 등), 학습관리시스템(LMS) 등)를 활용할 수 있으며, 평가 이전에 학생이 디지털 도구를 다룰 수 있도록 교육하여 <span class="bw"><input class="b" data-a="평가의 불이익" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">평가의 불이익</span></span>이 없도록 계획한다.</p>
+    <p>(다) 인공지능에 관련된 평가는 다양한 방식으로 나타날 수 있으므로 정량적 평가와 정성적 평가 내용을 <span class="bw"><input class="b" data-a="명확하게 구분" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">명확하게 구분</span></span>한다. 특히 <span class="bw"><input class="b" data-a="모델 학습과 적용" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">모델 학습과 적용</span></span>이 반복적으로 이루어지는 프로젝트의 경우 평가 결과가 학생 활동에 <span class="bw"><input class="b" data-a="즉시 피드백" placeholder="??" oninput="ck(this)"><span class="tick">✅</span><span class="hint">즉시 피드백</span></span>되어 결과물의 개선으로 나타날 수 있도록 평가를 계획한다.</p>
+  </div>
+
+  <div class="brow">
+    <button class="btn btn-p" onclick="checkAll('s7')">✅ 전체 채점</button>
+    <button class="btn btn-d" onclick="showAll('s7')">👁 정답 보기</button>
+    <button class="btn btn-s" onclick="reset('s7')">🔄 초기화</button>
+  </div>
+  <div class="rb" id="s7-result"></div>
+</div>
+</div>
+
+</main>
+
+<script>
+const SECS=['s1','s2','s3','s4','s5','s6','s7'];
+
+function norm(s){return s.replace(/[\s·•\-'"''"]/g,'').toLowerCase();}
+
+function ck(inp){
+  const v=inp.value.trim();
+  if(!v){inp.classList.remove('ok','ng');updateScore();return;}
+  if(norm(v)===norm(inp.dataset.a)){inp.classList.add('ok');inp.classList.remove('ng');}
+  else{inp.classList.add('ng');inp.classList.remove('ok');}
+  updateScore();
+}
+
+function checkAll(sid){
+  document.querySelectorAll('#'+sid+' input.b').forEach(i=>{
+    if(!i.value.trim()){i.classList.add('ng');i.classList.remove('ok');}
+    else ck(i);
+  });
+  showBanner(sid);
+  updateScore();
+  if(window._resizeAll) window._resizeAll();
+}
+
+function showAll(sid){
+  document.querySelectorAll('#'+sid+' input.b').forEach(i=>{
+    i.value=i.dataset.a;i.classList.add('ok');i.classList.remove('ng');
+  });
+  showBanner(sid);
+  updateScore();
+  if(window._resizeAll) window._resizeAll();
+}
+
+function reset(sid){
+  document.querySelectorAll('#'+sid+' input.b').forEach(i=>{
+    i.value='';i.classList.remove('ok','ng');
+  });
+  document.querySelectorAll('#'+sid+' .rb').forEach(r=>{r.classList.remove('show','ac','pt');});
+  updateScore();
+  if(window._resizeAll) window._resizeAll();
+}
+
+function showBanner(sid){
+  const inputs=document.querySelectorAll('#'+sid+' input.b');
+  let ok=0; inputs.forEach(i=>{if(i.classList.contains('ok'))ok++;});
+  const total=inputs.length;
+  // find last .rb in this section
+  const banners=document.querySelectorAll('#'+sid+' .rb');
+  const rb=banners[banners.length-1];
+  rb.classList.add('show');
+  if(ok===total){rb.className='rb show ac';rb.textContent='🎉 완벽! 모두 정답 ('+ok+'/'+total+')';}
+  else{rb.className='rb show pt';rb.textContent='📝 '+ok+'/'+total+' 정답 — 틀린 칸을 다시 확인하세요!';}
+}
+
+function go(sid,btn){
+  SECS.forEach(s=>{document.getElementById(s).classList.remove('on');});
+  document.getElementById(sid).classList.add('on');
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+}
+
+function updateScore(){
+  let tc=0,tt=0;
+  document.querySelectorAll('input.b').forEach(i=>{tt++;if(i.classList.contains('ok'))tc++;});
+  document.getElementById('tc').textContent=tc;
+  document.getElementById('tt').textContent=tt;
+  document.getElementById('tp').textContent=tt?Math.round(tc/tt*100):0;
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+
+  // ── 입력칸 너비 자동조절 (정답 길이 기준으로 초기화, 타이핑 시 실시간 확장) ──
+  const ruler = document.createElement('canvas').getContext('2d');
+  const FONT = '0.88rem Noto Sans KR, sans-serif';
+  ruler.font = FONT;
+
+  function measureText(str){
+    return ruler.measureText(str).width;
+  }
+
+  function resizeInput(inp){
+    // 현재 입력값과 정답 중 더 긴 것 기준 + 여백 24px
+    const answerW = measureText(inp.dataset.a || '');
+    const valueW  = measureText(inp.value || inp.placeholder || '');
+    const target  = Math.max(answerW, valueW, 50) + 24;
+    inp.style.width = target + 'px';
+  }
+
+  // 전체 input 초기 크기 설정 (정답 길이 기준)
+  document.querySelectorAll('input.b').forEach(inp => {
+    const w = measureText(inp.dataset.a || '') + 24;
+    inp.style.width = Math.max(w, 60) + 'px';
+  });
+
+  // 타이핑 시 실시간 크기 조절
+  document.addEventListener('input', function(e){
+    if(e.target.classList.contains('b')) resizeInput(e.target);
+  });
+
+  // 정답 보기 / 채점 후 크기 재조정
+  function resizeAll(){
+    document.querySelectorAll('input.b').forEach(resizeInput);
+  }
+
+  // 전역 등록
+  window._resizeAll = resizeAll;
+
+  updateScore();
+
+  // ── 힌트: 입력값 있을 때 hover 시 표시 ──
+  document.addEventListener('mouseover', function(e){
+    const bw = e.target.closest('.bw');
+    if(!bw) return;
+    const inp = bw.querySelector('input.b');
+    const hint = bw.querySelector('.hint');
+    if(!inp || !hint) return;
+    hint.style.display = inp.value.trim() ? 'block' : 'none';
+  });
+  document.addEventListener('mouseout', function(e){
+    const bw = e.target.closest('.bw');
+    if(!bw) return;
+    const hint = bw.querySelector('.hint');
+    if(hint) hint.style.display = 'none';
+  });
+});
+</script>
+</body>
+</html>
