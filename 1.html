@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>프로그래밍 교육과정 빈칸 맞추기</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --accent: #3C3489;
+    --accent-light: #EEEDFE;
+    --accent-mid: #7F77DD;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --teal-mid: #1D9E75;
+    --coral: #993C1D;
+    --coral-light: #FAECE7;
+    --text: #1a1a1a;
+    --text-sub: #555;
+    --text-hint: #999;
+    --border: #e0ddd5;
+    --correct: #1D9E75;
+    --wrong: #D85A30;
+    --correct-bg: #E1F5EE;
+    --wrong-bg: #FAECE7;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page-header {
+    max-width: 760px;
+    margin: 0 auto 2.5rem;
+    text-align: center;
+  }
+
+  .page-header .subtitle {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    color: var(--accent-mid);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .page-header h1 {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+
+  .progress-bar-wrap {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    background: var(--border);
+    border-radius: 999px;
+    height: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-mid), var(--teal-mid));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-hint);
+    padding: 0 2px;
+  }
+
+  .section-block {
+    max-width: 760px;
+    margin: 0 auto 2rem;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .section-badge {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+  }
+
+  .section-title h2 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .quiz-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.4rem 1.6rem;
+    margin-bottom: 1rem;
+    transition: box-shadow 0.2s;
+  }
+
+  .quiz-card:hover {
+    box-shadow: 0 2px 12px rgba(83,74,183,0.08);
+  }
+
+  .quiz-num {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-hint);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.7rem;
+  }
+
+  .quiz-text {
+    font-size: 15px;
+    line-height: 2;
+    color: var(--text);
+  }
+
+  .blank-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid var(--accent-mid);
+    background: var(--accent-light);
+    border-radius: 4px 4px 0 0;
+    padding: 2px 10px;
+    font-size: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 500;
+    color: var(--accent);
+    min-width: 70px;
+    width: auto;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+    vertical-align: middle;
+    margin: 0 3px;
+  }
+
+  .blank-input:focus {
+    border-bottom-color: var(--accent);
+    background: #e4e2fa;
+  }
+
+  .blank-input.correct {
+    background: var(--correct-bg);
+    border-bottom-color: var(--correct);
+    color: var(--teal);
+  }
+
+  .blank-input.wrong {
+    background: var(--wrong-bg);
+    border-bottom-color: var(--wrong);
+    color: var(--wrong);
+  }
+
+  .answer-hint {
+    display: none;
+    font-size: 12px;
+    margin-top: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+
+  .answer-hint.show {
+    display: inline-block;
+  }
+
+  .answer-hint.correct-hint {
+    background: var(--correct-bg);
+    color: var(--teal);
+  }
+
+  .answer-hint.wrong-hint {
+    background: var(--wrong-bg);
+    color: var(--coral);
+  }
+
+  .actions {
+    max-width: 760px;
+    margin: 2rem auto 0;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.65rem 1.8rem;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Noto Sans KR', sans-serif;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    background: #4a41b0;
+    border-color: #4a41b0;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--accent);
+  }
+
+  .btn-secondary:hover {
+    background: var(--accent-light);
+  }
+
+  .result-box {
+    max-width: 760px;
+    margin: 2rem auto 0;
+    padding: 1.5rem 2rem;
+    border-radius: var(--radius);
+    background: var(--card);
+    border: 1px solid var(--border);
+    text-align: center;
+    display: none;
+  }
+
+  .result-box.show { display: block; }
+
+  .result-score {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 3rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .result-sub {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 1.2rem;
+  }
+
+  .result-emoji {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-message {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 600px) {
+    .page-header h1 { font-size: 1.5rem; }
+    .quiz-card { padding: 1rem 1.1rem; }
+    .quiz-text { font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="subtitle">고등학교 직업 · 전문 교과</div>
+  <h1>프로그래밍 교육과정<br>빈칸 맞추기</h1>
+  <p>교육과정 문서의 핵심 용어를 떠올려 빈칸을 채워 보세요.<br>모든 답을 입력한 후 <strong>채점하기</strong> 버튼을 눌러 주세요.</p>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressBar"></div>
+</div>
+<div class="progress-label">
+  <span>진행률</span>
+  <span id="progressText">0 / 0 칸 입력됨</span>
+</div>
+
+<!-- 1. 성격 및 목표 -->
+<div class="section-block">
+  <div class="section-title">
+    <span class="section-badge">1</span>
+    <h2>성격 및 목표</h2>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q1</div>
+    <div class="quiz-text">
+      '프로그래밍'은 산업 분야의 인재 양성을 목적으로 하는 학과로서 <input class="blank-input" data-answer="교육감" placeholder="　　　"> 이 지정한 학과를 설치·운영하는 고등학교, <input class="blank-input" data-answer="산업수요 맞춤형" placeholder="　　　"> 고등학교 및 <input class="blank-input" data-answer="특성화" placeholder="　　"> 고등학교 학생들이 선택하여 이수할 수 있는 <input class="blank-input" data-answer="전공 일반" placeholder="　　"> 과목이다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q2</div>
+    <div class="quiz-text">
+      프로그래밍의 <input class="blank-input" data-answer="기본 개념" placeholder="　　"> 과 <input class="blank-input" data-answer="원리" placeholder="　"> 를 습득하고, <input class="blank-input" data-answer="컴퓨팅 사고" placeholder="　　"> 를 통한 <input class="blank-input" data-answer="디지털 문제 해결" placeholder="　　　"> 역량을 함양하여 산업 현장에서 <input class="blank-input" data-answer="직무" placeholder="　"> 를 효율적으로 수행할 수 있도록 교육하는 과목이다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q3</div>
+    <div class="quiz-text">
+      목표의 첫째, 프로그래밍 언어의 종류와 프로그램의 <input class="blank-input" data-answer="실행 절차" placeholder="　　"> , 알고리즘, 프로그래밍 <input class="blank-input" data-answer="개발 환경" placeholder="　　"> 에 대하여 설명할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q4</div>
+    <div class="quiz-text">
+      목표의 둘째, 프로그램에서 <input class="blank-input" data-answer="변수" placeholder="　"> 와 <input class="blank-input" data-answer="자료형" placeholder="　　"> , <input class="blank-input" data-answer="입력" placeholder="　"> 과 <input class="blank-input" data-answer="출력" placeholder="　"> , 연산자, <input class="blank-input" data-answer="제어문" placeholder="　　"> , 함수, <input class="blank-input" data-answer="파일 처리" placeholder="　　"> 를 설명할 수 있고, 이들을 활용한 프로그램을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q5</div>
+    <div class="quiz-text">
+      목표의 셋째, 산업 현장에서 사용하는 프로그램을 <input class="blank-input" data-answer="기획" placeholder="　"> 할 수 있고 <input class="blank-input" data-answer="설계" placeholder="　"> 할 수 있으며, 프로그래밍 언어를 사용하여 <input class="blank-input" data-answer="구현" placeholder="　"> 하고 <input class="blank-input" data-answer="테스트" placeholder="　　"> 할 수 있다.
+    </div>
+  </div>
+</div>
+
+<!-- 2. 내용 체계 -->
+<div class="section-block">
+  <div class="section-title">
+    <span class="section-badge">2</span>
+    <h2>내용 체계</h2>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q6</div>
+    <div class="quiz-text">
+      내용 체계의 세 가지 학습 영역은 <input class="blank-input" data-answer="프로그래밍의 개요" placeholder="　　　"> , <input class="blank-input" data-answer="프로그래밍의 기초" placeholder="　　　"> , <input class="blank-input" data-answer="프로그래밍 설계와 구현" placeholder="　　　　"> 이다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q7</div>
+    <div class="quiz-text">
+      '프로그래밍의 개요' 학습 영역의 학습 요소에는 프로그래밍 언어의 종류와 특징, 프로그래밍의 <input class="blank-input" data-answer="절차" placeholder="　"> , <input class="blank-input" data-answer="알고리즘" placeholder="　　　"> , 프로그래밍 개발 환경이 포함된다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q8</div>
+    <div class="quiz-text">
+      '프로그래밍의 기초' 학습 요소에는 변수와 자료형, 입력과 출력, 연산자, <input class="blank-input" data-answer="제어문" placeholder="　　"> , 함수, <input class="blank-input" data-answer="파일 처리" placeholder="　　"> 가 포함된다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q9</div>
+    <div class="quiz-text">
+      '프로그래밍 설계와 구현' 학습 요소에는 프로그램 <input class="blank-input" data-answer="기획" placeholder="　"> , 프로그램 <input class="blank-input" data-answer="설계" placeholder="　"> , 프로그램 <input class="blank-input" data-answer="구현" placeholder="　"> , 프로그램 <input class="blank-input" data-answer="테스트" placeholder="　　"> 가 포함된다.
+    </div>
+  </div>
+</div>
+
+<!-- 3. 성취기준 -->
+<div class="section-block">
+  <div class="section-title">
+    <span class="section-badge">3</span>
+    <h2>성취기준</h2>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q10 [프그 01-01]</div>
+    <div class="quiz-text">
+      각종 프로그래밍 언어의 종류와 특징을 이해하고, <input class="blank-input" data-answer="개발 분야" placeholder="　　"> 와 <input class="blank-input" data-answer="용도" placeholder="　"> 에 따라 적절한 프로그래밍 언어를 선택할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q11 [프그 01-02]</div>
+    <div class="quiz-text">
+      프로그램을 효율적으로 개발하기 위한 <input class="blank-input" data-answer="체계적인 절차" placeholder="　　　"> 와 단계별로 유의해야 할 사항에 대하여 설명할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q12 [프그 01-03]</div>
+    <div class="quiz-text">
+      주어진 문제를 해결하기 위한 <input class="blank-input" data-answer="알고리즘" placeholder="　　　"> 의 개념을 알고, <input class="blank-input" data-answer="순서도" placeholder="　　"> 또는 <input class="blank-input" data-answer="의사 코드" placeholder="　　　"> 등을 이용하여 문제를 해결하는 알고리즘을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q13 [프그 01-04]</div>
+    <div class="quiz-text">
+      디지털 기술을 통한 <input class="blank-input" data-answer="프로그래밍 공동 개발 환경" placeholder="　　　　"> 의 필요성과 공유 및 협업을 통한 프로그래밍을 경험할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q14 [프그 01-01 고려사항]</div>
+    <div class="quiz-text">
+      <input class="blank-input" data-answer="절차 지향" placeholder="　　"> 프로그래밍 언어와 <input class="blank-input" data-answer="객체 지향" placeholder="　　"> 프로그래밍 언어 등을 구분하여 지도하되, 산업 현장에서의 <input class="blank-input" data-answer="활용도" placeholder="　　"> 및 <input class="blank-input" data-answer="국가 기술 자격증" placeholder="　　　　"> 취득 등을 고려한 프로그래밍 언어를 중심으로 지도한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q15 [프그 01-04 고려사항]</div>
+    <div class="quiz-text">
+      프로그래밍 공동 개발 환경의 기술적인 구축보다는 디지털 기술을 통한 공유 및 협업의 중요성과 <input class="blank-input" data-answer="디지털 의사소통" placeholder="　　　"> 및 <input class="blank-input" data-answer="협력" placeholder="　　"> 역량 강화의 <input class="blank-input" data-answer="태도" placeholder="　"> 부분을 중심으로 지도한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q16 [프그 02-01]</div>
+    <div class="quiz-text">
+      <input class="blank-input" data-answer="변수" placeholder="　"> 와 <input class="blank-input" data-answer="자료형" placeholder="　　"> 의 개념과 특징을 이해하고, 구분하여 지정할 수 있으며, 이들을 사용한 프로그램을 작성할 수 있다. (지도 시 실제 프로그래밍에서 많이 쓰이는 <input class="blank-input" data-answer="배열" placeholder="　"> 을 비중 있게 지도한다.)
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q17 [프그 02-04]</div>
+    <div class="quiz-text">
+      <input class="blank-input" data-answer="순차" placeholder="　"> , <input class="blank-input" data-answer="선택" placeholder="　"> , <input class="blank-input" data-answer="반복" placeholder="　"> 의 제어 구조를 이해하고, 문제 상황에 알맞은 제어 구조를 선택하여 이를 적용한 프로그램을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q18 [프그 02-05]</div>
+    <div class="quiz-text">
+      함수의 개념과 종류, 필요성을 이해하고, <input class="blank-input" data-answer="함수 정의" placeholder="　　"> 및 <input class="blank-input" data-answer="사용자 정의" placeholder="　　　"> 함수를 호출하고 결괏값을 반환하는 프로그램을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q19 [프그 02-06]</div>
+    <div class="quiz-text">
+      파일의 개념을 이해하고 지원하는 <input class="blank-input" data-answer="파일 유형" placeholder="　　"> 을 사용하여 입력과 출력 과정을 설명할 수 있으며, 파일을 입출력하는 프로그램을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q20 [프그 03-01]</div>
+    <div class="quiz-text">
+      프로그램을 기획하는 다양한 방법과 절차를 이해하고, 구현하고자 하는 프로그램에 적합한 방법을 선택하여 <input class="blank-input" data-answer="요구 사항" placeholder="　　"> 을 도출하고 분석할 수 있으며, <input class="blank-input" data-answer="디지털 도구" placeholder="　　　"> 를 이용하여 프로그램을 기획할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q21 [프그 03-02]</div>
+    <div class="quiz-text">
+      산업 현장에서 필요로 하는 프로그램의 구조를 설계하여 <input class="blank-input" data-answer="기본 개발 설계서" placeholder="　　　　"> 를 작성한 후, 설계된 프로그램의 알고리즘을 작성할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q22 [프그 03-04]</div>
+    <div class="quiz-text">
+      구현된 프로그램을 대상으로 <input class="blank-input" data-answer="단위" placeholder="　"> 테스트, <input class="blank-input" data-answer="통합" placeholder="　"> 테스트, <input class="blank-input" data-answer="시스템" placeholder="　　"> 테스트를 할 수 있다.
+    </div>
+  </div>
+</div>
+
+<!-- 4. 교수학습 -->
+<div class="section-block">
+  <div class="section-title">
+    <span class="section-badge">4</span>
+    <h2>교수·학습</h2>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q23</div>
+    <div class="quiz-text">
+      '프로그래밍' 교수·학습은 <input class="blank-input" data-answer="문제 해결" placeholder="　　"> 능력, <input class="blank-input" data-answer="디지털" placeholder="　　"> 역량, <input class="blank-input" data-answer="의사소통" placeholder="　　"> 역량, <input class="blank-input" data-answer="공동체" placeholder="　　"> 역량을 함양하는 데 중점을 둔다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q24</div>
+    <div class="quiz-text">
+      학생들의 수업 참여 동기를 높일 수 있도록 <input class="blank-input" data-answer="가상 공간" placeholder="　　"> 에서의 활동 등을 계획하고, 그 공간에서의 협업을 통하여 배움이 이루어지도록 하는 데 중점을 둔다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q25</div>
+    <div class="quiz-text">
+      실생활에서 직면하는 문제 해결 중심의 <input class="blank-input" data-answer="실무 과제" placeholder="　　"> 를 통하여 프로그래밍 능력을 함양할 수 있도록 한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q26</div>
+    <div class="quiz-text">
+      '프로그래밍의 기초' 영역에서 산업 현장 및 자격 취득 시 요구되는 언어에는 <input class="blank-input" data-answer="C" placeholder="　"> , <input class="blank-input" data-answer="C++" placeholder="　　"> , <input class="blank-input" data-answer="JAVA" placeholder="　　"> , <input class="blank-input" data-answer="Python" placeholder="　　"> 등 다양한 언어가 있음을 학생들이 인지할 수 있도록 지도한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q27 (유의사항)</div>
+    <div class="quiz-text">
+      <input class="blank-input" data-answer="문법" placeholder="　"> 위주의 프로그래밍 언어 수업이 되지 않도록 유의하며, 코드의 <input class="blank-input" data-answer="가독성" placeholder="　　"> 을 높이는 코딩 습관을 갖도록 지도한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q28 (유의사항)</div>
+    <div class="quiz-text">
+      정의적 내용이 실제 산업 현장에서도 적용할 수 있도록 지식 학습으로 그치지 않고 <input class="blank-input" data-answer="태도" placeholder="　"> 로 <input class="blank-input" data-answer="내면화" placeholder="　　"> 되도록 지도한다.
+    </div>
+  </div>
+</div>
+
+<!-- 5. 평가 -->
+<div class="section-block">
+  <div class="section-title">
+    <span class="section-badge">5</span>
+    <h2>평가</h2>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q29</div>
+    <div class="quiz-text">
+      학생이 정보·통신 관련 분야에서 요구하는 <input class="blank-input" data-answer="정보 활용" placeholder="　　"> 능력, <input class="blank-input" data-answer="문제 해결" placeholder="　　"> 능력 및 <input class="blank-input" data-answer="디지털 역량" placeholder="　　　"> 을 갖추었는가를 측정할 수 있도록 평가를 계획하고 시행한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q30</div>
+    <div class="quiz-text">
+      문제 해결 시나리오, <input class="blank-input" data-answer="사례 연구" placeholder="　　"> , <input class="blank-input" data-answer="조사 보고서" placeholder="　　　"> 등 다양한 평가 방법을 고려하여 적용할 수 있다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q31</div>
+    <div class="quiz-text">
+      학습 공간과 일상이 연계된 평가를 위해 <input class="blank-input" data-answer="가상 현실" placeholder="　　"> , <input class="blank-input" data-answer="증강 현실" placeholder="　　"> , <input class="blank-input" data-answer="메타버스" placeholder="　　　"> 등을 통해 학생들이 프로그래밍에 대해 직간접적으로 체험하게 하고, 이 과정 및 결과에 대하여 평가한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q32</div>
+    <div class="quiz-text">
+      최소 성취수준에 도달하지 못한 학생에게는 평가 결과에 대한 <input class="blank-input" data-answer="피드백" placeholder="　　"> 과 함께 <input class="blank-input" data-answer="보충 자료" placeholder="　　"> 를 제시하여 학습을 지원한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q33</div>
+    <div class="quiz-text">
+      지필평가 문항 제작 및 시행과 채점에 관한 사항을 평가 계획서에 근거하여 <input class="blank-input" data-answer="점검표" placeholder="　　"> 로 만들어 각 항목을 하나씩 점검함으로써 신뢰도를 유지해야 한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q34 (평가방법)</div>
+    <div class="quiz-text">
+      '프로그래밍의 기초'는 <input class="blank-input" data-answer="평가자 체크리스트" placeholder="　　　　"> , <input class="blank-input" data-answer="서술형 시험" placeholder="　　　"> 등을 활용하여 프로그래밍 언어 문법의 이해 정도와 프로그램 작성 능력 등을 평가한다.
+    </div>
+  </div>
+
+  <div class="quiz-card">
+    <div class="quiz-num">Q35 (평가방법)</div>
+    <div class="quiz-text">
+      '프로그래밍 설계와 구현'은 프로젝트 수업을 통해 <input class="blank-input" data-answer="포트폴리오" placeholder="　　　"> 등을 평가한다. 분석된 <input class="blank-input" data-answer="테스트 케이스" placeholder="　　　"> 에 따라 테스트를 수행하고, <input class="blank-input" data-answer="컴퓨팅 사고" placeholder="　　　"> 역량, <input class="blank-input" data-answer="디지털 문제 해결" placeholder="　　　"> 역량, <input class="blank-input" data-answer="디지털 의사소통 및 협력" placeholder="　　　　　"> 역량을 길러 실무를 <input class="blank-input" data-answer="창의적" placeholder="　　"> 으로 수행할 수 있는지를 평가한다.
+    </div>
+  </div>
+</div>
+
+<div class="actions">
+  <button class="btn btn-secondary" onclick="resetAll()">다시 풀기</button>
+  <button class="btn btn-primary" onclick="gradeAll()">채점하기 ✓</button>
+</div>
+
+<div class="result-box" id="resultBox">
+  <div class="result-emoji" id="resultEmoji"></div>
+  <div class="result-score" id="resultScore"></div>
+  <div class="result-sub" id="resultSub"></div>
+  <div class="result-message" id="resultMessage"></div>
+  <hr class="divider">
+  <p style="font-size:13px; color:var(--text-sub);">틀린 답은 빨간 밑줄로 표시됩니다. 정답을 확인하고 다시 도전해 보세요!</p>
+</div>
+
+<script>
+const inputs = document.querySelectorAll('.blank-input');
+const total = inputs.length;
+
+function normalize(str) {
+  return str.trim().replace(/\s+/g, ' ').toLowerCase()
+    .replace(/\+\+/g, '++');
+}
+
+function updateProgress() {
+  let filled = 0;
+  inputs.forEach(inp => {
+    if (inp.value.trim() !== '') filled++;
+  });
+  const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = filled + ' / ' + total + ' 칸 입력됨';
+}
+
+inputs.forEach(inp => {
+  inp.setAttribute('size', Math.max(4, (inp.getAttribute('data-answer') || '').length + 1));
+  inp.addEventListener('input', updateProgress);
+});
+
+updateProgress();
+
+function gradeAll() {
+  let correct = 0;
+  inputs.forEach(inp => {
+    const answer = inp.getAttribute('data-answer') || '';
+    const userVal = inp.value;
+    const isCorrect = normalize(userVal) === normalize(answer);
+    inp.classList.remove('correct', 'wrong');
+    let hint = inp.nextElementSibling;
+    if (!hint || !hint.classList.contains('answer-hint')) {
+      hint = document.createElement('span');
+      hint.className = 'answer-hint';
+      inp.parentNode.insertBefore(hint, inp.nextSibling);
+    }
+    hint.classList.remove('show', 'correct-hint', 'wrong-hint');
+    if (isCorrect) {
+      correct++;
+      inp.classList.add('correct');
+      hint.textContent = '✓ 정답!';
+      hint.classList.add('show', 'correct-hint');
+    } else {
+      inp.classList.add('wrong');
+      hint.textContent = '정답: ' + answer;
+      hint.classList.add('show', 'wrong-hint');
+    }
+  });
+  showResult(correct, total);
+}
+
+function showResult(correct, total) {
+  const box = document.getElementById('resultBox');
+  const pct = Math.round((correct / total) * 100);
+  document.getElementById('resultScore').textContent = correct + ' / ' + total;
+  document.getElementById('resultSub').textContent = '정답률 ' + pct + '%';
+  let emoji, msg;
+  if (pct === 100) { emoji = '🏆'; msg = '완벽합니다! 모든 빈칸을 맞혔어요!'; }
+  else if (pct >= 80) { emoji = '🎉'; msg = '훌륭해요! 조금만 더 다듬으면 완벽!'; }
+  else if (pct >= 60) { emoji = '👍'; msg = '좋아요! 틀린 부분을 다시 확인해 보세요.'; }
+  else if (pct >= 40) { emoji = '📖'; msg = '절반 이상 맞혔어요. 한 번 더 도전!'; }
+  else { emoji = '💪'; msg = '교육과정 문서를 다시 읽고 도전해 보세요!'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultMessage').textContent = msg;
+  box.classList.add('show');
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function resetAll() {
+  inputs.forEach(inp => {
+    inp.value = '';
+    inp.classList.remove('correct', 'wrong');
+    let hint = inp.nextElementSibling;
+    if (hint && hint.classList.contains('answer-hint')) {
+      hint.classList.remove('show');
+    }
+  });
+  document.getElementById('resultBox').classList.remove('show');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
