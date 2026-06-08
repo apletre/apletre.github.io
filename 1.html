@@ -166,7 +166,6 @@
     outline: none;
     transition: border-color 0.2s, background 0.2s;
     vertical-align: middle;
-    margin: 0 3px;
   }
 
   .blank-input:focus {
@@ -186,26 +185,47 @@
     color: var(--wrong);
   }
 
-  .answer-hint {
-    display: none;
-    font-size: 12px;
-    margin-top: 6px;
-    padding: 4px 8px;
-    border-radius: 4px;
-  }
-
-  .answer-hint.show {
+  .blank-wrap {
     display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    margin: 0 3px;
   }
 
-  .answer-hint.correct-hint {
-    background: var(--correct-bg);
-    color: var(--teal);
+  .blank-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #3C3489;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(60,52,137,0.18);
   }
 
-  .answer-hint.wrong-hint {
-    background: var(--wrong-bg);
-    color: var(--coral);
+  .blank-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #3C3489;
+  }
+
+  .blank-wrap:hover .blank-tooltip {
+    display: block;
+  }
+
+  .blank-input {
+    margin: 0;
   }
 
   .actions {
@@ -304,7 +324,7 @@
 <div class="page-header">
   <div class="subtitle">고등학교 직업 · 전문 교과</div>
   <h1>프로그래밍 교육과정<br>빈칸 맞추기</h1>
-  <p>교육과정 문서의 핵심 용어를 떠올려 빈칸을 채워 보세요.<br>모든 답을 입력한 후 <strong>채점하기</strong> 버튼을 눌러 주세요.</p>
+  <p>교육과정 문서의 핵심 용어를 떠올려 빈칸을 채워 보세요.<br>입력하는 즉시 정오답이 표시되며, 입력 후 마우스를 올리면 정답을 확인할 수 있어요.</p>
 </div>
 
 <div class="progress-bar-wrap">
@@ -602,7 +622,6 @@
 
 <div class="actions">
   <button class="btn btn-secondary" onclick="resetAll()">다시 풀기</button>
-  <button class="btn btn-primary" onclick="gradeAll()">채점하기 ✓</button>
 </div>
 
 <div class="result-box" id="resultBox">
@@ -611,61 +630,77 @@
   <div class="result-sub" id="resultSub"></div>
   <div class="result-message" id="resultMessage"></div>
   <hr class="divider">
-  <p style="font-size:13px; color:var(--text-sub);">틀린 답은 빨간 밑줄로 표시됩니다. 정답을 확인하고 다시 도전해 보세요!</p>
+  <p style="font-size:13px; color:var(--text-sub);">빨간 빈칸에 마우스를 올리면 정답을 확인할 수 있어요. 다시 풀기로 도전해 보세요!</p>
 </div>
 
 <script>
-const inputs = document.querySelectorAll('.blank-input');
-const total = inputs.length;
-
 function normalize(str) {
-  return str.trim().replace(/\s+/g, ' ').toLowerCase()
-    .replace(/\+\+/g, '++');
+  return str.trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function wrapInputs() {
+  document.querySelectorAll('.blank-input').forEach(inp => {
+    const answer = inp.getAttribute('data-answer') || '';
+    inp.setAttribute('size', Math.max(4, answer.length + 1));
+    inp.removeAttribute('placeholder');
+
+    const wrap = document.createElement('span');
+    wrap.className = 'blank-wrap';
+
+    const tooltip = document.createElement('span');
+    tooltip.className = 'blank-tooltip';
+    tooltip.textContent = '정답: ' + answer;
+    tooltip.style.display = 'none';
+
+    inp.parentNode.insertBefore(wrap, inp);
+    wrap.appendChild(tooltip);
+    wrap.appendChild(inp);
+
+    wrap.addEventListener('mouseenter', () => {
+      if (inp.value.trim() !== '') tooltip.style.display = 'block';
+    });
+    wrap.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+
+    inp.addEventListener('input', () => {
+      gradeInput(inp);
+      updateProgress();
+      if (inp.value.trim() === '') tooltip.style.display = 'none';
+    });
+  });
+}
+
+function gradeInput(inp) {
+  const answer = inp.getAttribute('data-answer') || '';
+  const val = inp.value;
+  inp.classList.remove('correct', 'wrong');
+  if (val.trim() === '') return;
+  if (normalize(val) === normalize(answer)) {
+    inp.classList.add('correct');
+  } else {
+    inp.classList.add('wrong');
+  }
 }
 
 function updateProgress() {
-  let filled = 0;
+  const inputs = document.querySelectorAll('.blank-input');
+  const total = inputs.length;
+  let filled = 0, correct = 0;
   inputs.forEach(inp => {
     if (inp.value.trim() !== '') filled++;
+    if (inp.classList.contains('correct')) correct++;
   });
   const pct = total > 0 ? Math.round((filled / total) * 100) : 0;
   document.getElementById('progressBar').style.width = pct + '%';
-  document.getElementById('progressText').textContent = filled + ' / ' + total + ' 칸 입력됨';
-}
+  document.getElementById('progressText').textContent =
+    filled + ' / ' + total + ' 칸 입력됨  ·  정답 ' + correct + '개';
 
-inputs.forEach(inp => {
-  inp.setAttribute('size', Math.max(4, (inp.getAttribute('data-answer') || '').length + 1));
-  inp.addEventListener('input', updateProgress);
-});
-
-updateProgress();
-
-function gradeAll() {
-  let correct = 0;
-  inputs.forEach(inp => {
-    const answer = inp.getAttribute('data-answer') || '';
-    const userVal = inp.value;
-    const isCorrect = normalize(userVal) === normalize(answer);
-    inp.classList.remove('correct', 'wrong');
-    let hint = inp.nextElementSibling;
-    if (!hint || !hint.classList.contains('answer-hint')) {
-      hint = document.createElement('span');
-      hint.className = 'answer-hint';
-      inp.parentNode.insertBefore(hint, inp.nextSibling);
-    }
-    hint.classList.remove('show', 'correct-hint', 'wrong-hint');
-    if (isCorrect) {
-      correct++;
-      inp.classList.add('correct');
-      hint.textContent = '✓ 정답!';
-      hint.classList.add('show', 'correct-hint');
-    } else {
-      inp.classList.add('wrong');
-      hint.textContent = '정답: ' + answer;
-      hint.classList.add('show', 'wrong-hint');
-    }
-  });
-  showResult(correct, total);
+  if (filled === total) {
+    showResult(correct, total);
+  } else {
+    document.getElementById('resultBox').classList.remove('show');
+  }
 }
 
 function showResult(correct, total) {
@@ -682,22 +717,22 @@ function showResult(correct, total) {
   document.getElementById('resultEmoji').textContent = emoji;
   document.getElementById('resultMessage').textContent = msg;
   box.classList.add('show');
-  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function resetAll() {
-  inputs.forEach(inp => {
+  document.querySelectorAll('.blank-input').forEach(inp => {
     inp.value = '';
     inp.classList.remove('correct', 'wrong');
-    let hint = inp.nextElementSibling;
-    if (hint && hint.classList.contains('answer-hint')) {
-      hint.classList.remove('show');
-    }
+    const wrap = inp.closest('.blank-wrap');
+    if (wrap) wrap.querySelector('.blank-tooltip').style.display = 'none';
   });
   document.getElementById('resultBox').classList.remove('show');
   updateProgress();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+wrapInputs();
+updateProgress();
 </script>
 </body>
 </html>
