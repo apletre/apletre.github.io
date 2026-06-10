@@ -125,6 +125,7 @@ input.b.ok~.tick{display:inline}
   <div class="hbar">
     <div class="hpill">전체 정답 <b id="tc">0</b> / <b id="tt">0</b></div>
     <div class="hpill">정답률 <b id="tp">0</b>%</div>
+    <div class="hpill" id="togglePill" onclick="toggleInstant()" style="cursor:pointer;user-select:none;">즉시 확인 <b id="toggleLabel">ON</b></div>
   </div>
 </header>
 
@@ -668,10 +669,26 @@ input.b.ok~.tick{display:inline}
 
 <script>
 const SECS=['s1','s2','s3','s4','s5','s6','s7'];
+let instantCheck = true;
+
+function toggleInstant(){
+  instantCheck = !instantCheck;
+  const label = document.getElementById('toggleLabel');
+  const pill = document.getElementById('togglePill');
+  label.textContent = instantCheck ? 'ON' : 'OFF';
+  pill.style.opacity = instantCheck ? '1' : '0.5';
+  if(!instantCheck){
+    document.querySelectorAll('input.b').forEach(i=>{
+      i.classList.remove('ok','ng');
+    });
+    updateScore();
+  }
+}
 
 function norm(s){return s.replace(/[\s·•\-'"''"]/g,'').toLowerCase();}
 
 function ck(inp){
+  if(!instantCheck){updateScore();return;}
   const v=inp.value.trim();
   if(!v){inp.classList.remove('ok','ng');updateScore();return;}
   if(norm(v)===norm(inp.dataset.a)){inp.classList.add('ok');inp.classList.remove('ng');}
