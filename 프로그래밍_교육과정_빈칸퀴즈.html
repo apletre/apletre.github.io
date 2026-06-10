@@ -423,7 +423,10 @@ function ck(inp){
 function checkAll(sid){
   document.querySelectorAll('#'+sid+' input.b').forEach(i=>{
     if(!i.value.trim()){i.classList.add('ng');i.classList.remove('ok');}
-    else ck(i);
+    else{
+      if(norm(i.value.trim())===norm(i.dataset.a)){i.classList.add('ok');i.classList.remove('ng');}
+      else{i.classList.add('ng');i.classList.remove('ok');}
+    }
   });
   showBanner(sid);
   updateScore();
