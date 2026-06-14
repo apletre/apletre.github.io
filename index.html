@@ -113,7 +113,10 @@ input.b.ok~.tick{display:inline}
   header{padding:14px 16px}header h1{font-size:1.1rem}
   .card{padding:14px 15px}main{padding:15px 10px 60px}
   nav button{padding:9px 13px;font-size:.75rem}
-  input.b{min-width:55px;font-size:.82rem}
+
+  /* 긴 입력칸이 잘리지 않도록 */
+  .bw{display:flex;flex-wrap:wrap;max-width:100%}
+  input.b{min-width:55px;max-width:100%;width:auto!important;flex:1;font-size:.82rem;box-sizing:border-box}
 
   /* 모바일 테이블 → 카드형 */
   .tw{overflow-x:visible}
@@ -789,6 +792,16 @@ document.addEventListener('DOMContentLoaded', function(){
     const w = measureText(inp.dataset.a || '') + 24;
     inp.style.width = Math.max(w, 60) + 'px';
   });
+
+  // 웹폰트(Noto Sans KR) 로딩이 늦어 초기 측정이 작게 잡히는 경우 재보정
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){
+      document.querySelectorAll('input.b').forEach(inp => {
+        const w = measureText(inp.dataset.a || '') + 24;
+        inp.style.width = Math.max(w, 60) + 'px';
+      });
+    });
+  }
 
   // 타이핑 시 실시간 크기 조절
   document.addEventListener('input', function(e){
