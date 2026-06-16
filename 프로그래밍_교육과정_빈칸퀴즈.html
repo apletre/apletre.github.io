@@ -492,6 +492,14 @@ document.addEventListener('DOMContentLoaded',function(){
     const w=measureText(inp.dataset.a||'')+24;
     inp.style.width=Math.max(w,60)+'px';
   });
+  if(document.fonts && document.fonts.ready){
+    document.fonts.ready.then(function(){
+      document.querySelectorAll('input.b').forEach(inp=>{
+        const w=measureText(inp.dataset.a||'')+24;
+        inp.style.width=Math.max(w,60)+'px';
+      });
+    });
+  }
   document.addEventListener('input',function(e){
     if(e.target.classList.contains('b'))resizeInput(e.target);
   });
@@ -502,6 +510,19 @@ document.addEventListener('DOMContentLoaded',function(){
     const bw=e.target.closest('.bw');if(!bw)return;
     const inp=bw.querySelector('input.b');const hint=bw.querySelector('.hint');if(!inp||!hint)return;
     hint.style.display=inp.value.trim()?'block':'none';
+  });
+
+  // 숫자키 1~9로 섹션 이동 (input 포커스 중엔 무시)
+  window.addEventListener('keydown', function(e){
+    if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA')return;
+    // e.key(숫자) 또는 e.code(Digit1~9) 둘 다 체크
+    let idx = -1;
+    if(/^[1-9]$/.test(e.key)) idx = parseInt(e.key) - 1;
+    else if(/^Digit[1-9]$/.test(e.code)) idx = parseInt(e.code.replace('Digit','')) - 1;
+    if(idx >= 0 && idx < SECS.length){
+      const btn = document.querySelectorAll('nav button')[idx];
+      if(btn){btn.click();window.scrollTo({top:0,behavior:'smooth'});}
+    }
   });
   document.addEventListener('mouseout',function(e){
     const bw=e.target.closest('.bw');if(!bw)return;
